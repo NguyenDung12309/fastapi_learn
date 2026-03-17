@@ -53,7 +53,7 @@ pip install -r requirements.txt
 Start server:
 
 ```bash
-uvicorn main:app --reload
+uvicorn src:app --reload
 ```
 
 Giải thích:
