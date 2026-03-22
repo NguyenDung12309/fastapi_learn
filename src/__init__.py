@@ -9,7 +9,7 @@ from src.db.main import init_db
 @asynccontextmanager
 async def life_span(app: FastAPI):
     print("server is running...")
-    await init_db()
+    init_db()
     yield
     print("server is done...")
 
@@ -21,4 +21,4 @@ app = FastAPI(
     lifespan=life_span,
 )
 
-app.include_router(book_router, prefix="/api/{version}/books", tags=["books"])
+app.include_router(book_router, prefix=f"/api/{version}/books", tags=["books"])
