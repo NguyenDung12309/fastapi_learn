@@ -5,12 +5,25 @@ from src.app.book.schemas import BookCreateReq, BookUpdateReq
 from src.app.book.models import BookModel
 from sqlmodel import Session, select, desc
 
+from src.app.common.schemas import PaginatedResponse
+from src.utils.get_pagination_meta import get_pagination_metadata
+
+
 class BookService:
     @staticmethod
-    def get_all_book(session: Session) -> Sequence[BookModel]:
-        statement = select(BookModel).order_by(desc(BookModel.created_at))
-        result = session.exec(statement)
-        return result.all()
+    def get_all_book(session: Session, page: int = 1, page_size: int = 10) -> PaginatedResponse[BookModel] :
+        offset_value = (page - 1) * page_size
+        statement = select(BookModel).order_by(desc(BookModel.created_at)).offset(offset_value).limit(page_size)
+        result = session.exec(statement).all()
+        total_count, total_pages = get_pagination_metadata(session, BookModel, page, page_size)
+
+        return PaginatedResponse[BookModel](
+            items=result,
+            total_count=total_count,
+            page=page,
+            page_size=page_size,
+            total_pages=total_pages
+        )
 
     @staticmethod
     def get_book_by_id( book_uid: UUID, session: Session) -> BookModel:

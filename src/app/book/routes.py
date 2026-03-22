@@ -5,15 +5,16 @@ from fastapi.params import Depends
 from src.app.book.models import BookModel
 from src.app.book.schemas import  BookCreateReq, BookUpdateReq
 from src.app.book.services import BookService
+from src.app.common.schemas import PaginatedResponse
 from src.db.main import get_session
 from sqlmodel import Session
 
 book_router = APIRouter()
 book_service = BookService()
 
-@book_router.get("/", response_model=list[BookModel])
-def get_all_books(session: Session = Depends(get_session)) -> Sequence[BookModel]:
-    books = book_service.get_all_book(session)
+@book_router.get("/", response_model=PaginatedResponse[BookModel])
+def get_all_books(page: int = 1, page_size: int = 10, session: Session = Depends(get_session)) -> PaginatedResponse[BookModel]:
+    books = book_service.get_all_book(session, page, page_size)
     return books
 
 @book_router.post("/", status_code=status.HTTP_201_CREATED)
