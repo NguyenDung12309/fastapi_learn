@@ -42,6 +42,7 @@ class BookService:
             for key, value in dump_data.items():
                 setattr(book_info, key, value)
             await session.commit()
+            await session.refresh(book_info)
         return book_info
 
     async def delete_book(self, book_uid: UUID, session: AsyncSession) -> BookModel:

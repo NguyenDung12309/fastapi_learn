@@ -26,7 +26,7 @@ class BookModel(SQLModel, table=True):
         sa_column=Column(pg.TIMESTAMP, server_default=func.now())
     )
     updated_at: datetime = Field(
-        sa_column=Column(pg.TIMESTAMP, server_default=func.now())
+        sa_column=Column(pg.TIMESTAMP, server_default=func.now(), onupdate=func.now())
     )
 
     def __repr__(self):
