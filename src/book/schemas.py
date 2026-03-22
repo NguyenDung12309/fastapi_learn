@@ -16,10 +16,4 @@ class BookCreateReq(BookBase):
     pass
 
 class BookUpdateReq(BookBase):
-    id: UUID
     pass
-
-class Book(BookBase):
-    id: UUID
-    created_at: datetime
-    updated_at: datetime

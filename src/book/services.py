@@ -1,9 +1,10 @@
 from uuid import UUID
 
+from fastapi import HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select, desc
 from typing import Sequence
-from src.book.schemas import Book, BookCreateReq, BookUpdateReq
+from src.book.schemas import BookCreateReq, BookUpdateReq
 
 from src.book.models import BookModel
 
@@ -17,9 +18,14 @@ class BookService:
     @staticmethod
     async def get_book_by_id( book_uid: UUID, session: AsyncSession) -> BookModel:
         statement = select(BookModel).where(BookModel.id == book_uid)
-        result = await session.execute(statement)
-
-        return result.scalar_one_or_none()
+        exec_query = await session.execute(statement)
+        result = exec_query.scalar_one_or_none()
+        if not result:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Book not found"
+            )
+        return result
 
     @staticmethod
     async def create_book(payload: BookCreateReq, session: AsyncSession) -> BookModel:
@@ -32,9 +38,10 @@ class BookService:
     async def update_book(self, book_uid: UUID, payload: BookUpdateReq, session: AsyncSession) -> BookModel:
         book_info = await self.get_book_by_id(book_uid, session)
         dump_data = payload.model_dump()
-        for key, value in dump_data.items():
-            setattr(book_info, key, value)
-        await session.commit()
+        if book_info:
+            for key, value in dump_data.items():
+                setattr(book_info, key, value)
+            await session.commit()
         return book_info
 
     async def delete_book(self, book_uid: UUID, session: AsyncSession) -> BookModel:
