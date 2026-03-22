@@ -1,8 +1,8 @@
 from uuid import UUID
 from fastapi import HTTPException, status
 from typing import Sequence
-from src.book.schemas import BookCreateReq, BookUpdateReq
-from src.book.models import BookModel
+from src.app.book.schemas import BookCreateReq, BookUpdateReq
+from src.app.book.models import BookModel
 from sqlmodel import Session, select, desc
 
 class BookService:

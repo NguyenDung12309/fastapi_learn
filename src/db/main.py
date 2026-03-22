@@ -10,7 +10,6 @@ engine = create_engine(
 )
 
 def init_db():
-    from src.book.models import BookModel
     SQLModel.metadata.create_all(bind=engine)
 
 def get_session():

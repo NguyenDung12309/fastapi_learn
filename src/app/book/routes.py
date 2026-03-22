@@ -2,9 +2,9 @@ from typing import Sequence
 from uuid import UUID
 from fastapi import APIRouter, status
 from fastapi.params import Depends
-from src.book.models import BookModel
-from src.book.schemas import  BookCreateReq, BookUpdateReq
-from src.book.services import BookService
+from src.app.book.models import BookModel
+from src.app.book.schemas import  BookCreateReq, BookUpdateReq
+from src.app.book.services import BookService
 from src.db.main import get_session
 from sqlmodel import Session
 
