@@ -1,23 +1,25 @@
-from src.config import Config
-from sqlmodel import SQLModel
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, Engine
 from sqlalchemy.orm import sessionmaker
 from sqlmodel import Session
 
-engine = create_engine(
-    url=Config.DATABASE_URL,
-    echo=True,
-)
+from src.core.config import Config
 
-def init_db():
-    SQLModel.metadata.create_all(bind=engine)
 
-def get_session():
-    session_local = sessionmaker(
-        bind=engine,
-        class_=Session,
-        expire_on_commit=False
-    )
+class DatabaseManager:
+    def __init__(self):
+        self._engine = create_engine(Config.database_url, echo=True)
+        self._session_factory = sessionmaker(bind=self.engine, class_=Session, expire_on_commit=False)
 
-    with session_local() as session:
-        yield session
+    @property
+    def engine(self) -> Engine:
+        return self._engine
+
+    def get_db(self):
+        with self._session_factory() as session:
+            yield session
+
+    def close_connections(self):
+        self._engine.dispose()
+
+
+db_manager = DatabaseManager()

@@ -56,14 +56,6 @@ Start server:
 uvicorn src:app --reload
 ```
 
-Giải thích:
-
-* `main` → file `main.py`
-* `app` → biến FastAPI instance
-* `--reload` → tự restart khi code thay đổi
-
----
-
 ## 4. Truy cập API
 
 Sau khi chạy server:
