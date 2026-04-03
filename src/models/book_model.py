@@ -19,7 +19,7 @@ class BookModel(BaseTableModel, table=True):
 
     title: str = Field(index=True)
     slug: str = Field(unique=True, index=True)
-    author_id: UUID = Field(foreign_key="user.id")
+    author_id: UUID = Field(foreign_key="author.id")
     author: "AuthorModel" = Relationship(back_populates="books")
     description: str
     publisher_id: UUID = Field(foreign_key="user.id")
