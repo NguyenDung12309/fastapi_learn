@@ -49,13 +49,20 @@ class FastAPIServer:
 
         @self._app.exception_handler(AppError)
         def app_error_handler(request: Request, exc: AppError):
+            response_content = {
+                "status": "error",
+                "code": exc.status_code,
+                "message": exc.message
+            }
+
+            if hasattr(exc, 'errors') and exc.errors:
+                response_content["errors"] = exc.errors
+            elif hasattr(exc, 'fields') and exc.fields:
+                response_content["errors"] = exc.fields
+
             return JSONResponse(
                 status_code=exc.status_code,
-                content={
-                    "status": "error",
-                    "code": exc.status_code,
-                    "message": exc.message
-                }
+                content=response_content
             )
 
     @staticmethod

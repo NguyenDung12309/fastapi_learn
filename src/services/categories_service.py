@@ -12,7 +12,8 @@ class CategoryService(BaseService[CategoryModel, CategoryCreateSchema, CategoryU
 
     def create(self, schema: CategoryCreateSchema):
         existing = self._category_repo.get_by_name(schema.name)
+
         if existing:
-            raise ConflictError(schema.name)
+            raise ConflictError(conflicts={"name": schema.name})
 
         return super().create(schema)

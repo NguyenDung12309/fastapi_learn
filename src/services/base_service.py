@@ -22,11 +22,11 @@ class BaseService(Generic[T, TCreate, TUpdate]):
     def get_by_id(self, uid: UUID) -> T:
         return self._repository.get_by_id(uid)
 
-    def create(self, schema: TCreate):
+    def create(self, schema: TCreate) -> T:
         data = self._model_class(**schema.model_dump())
         return self._repository.create(data)
 
-    def update(self, uid: UUID, schema: TUpdate):
+    def update(self, uid: UUID, schema: TUpdate) -> T:
         info = self._repository.get_by_id(uid)
         update_data = schema.model_dump()
         for key, value in update_data.items():

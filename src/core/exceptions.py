@@ -1,23 +1,59 @@
+from typing import Any, Dict, Optional, Union
+
+
 class AppError(Exception):
-    def __init__(self, message: str, status_code: int = 400):
+    def __init__(
+            self,
+            message: str,
+            status_code: int = 400,
+            errors: Optional[Union[Dict[str, Any], list]] = None
+    ):
         self.message = message
         self.status_code = status_code
+        self.errors = errors
         super().__init__(self.message)
 
-
-class NotFoundError(AppError):
-    def __init__(self):
-        super().__init__(
-            message=f"id not found",
-            status_code=404
-        )
+    def to_response(self):
+        payload = {
+            "status": "error",
+            "message": self.message,
+            "code": self.status_code
+        }
+        if self.errors is not None:
+            payload["errors"] = self.errors
+        return payload
 
 
 class ValidationError(AppError):
-    def __init__(self, message: str):
-        super().__init__(message=message, status_code=422)
+    def __init__(self, field_errors: Dict[str, str]):
+        super().__init__(
+            message="Dữ liệu đầu vào không hợp lệ",
+            status_code=422,
+            errors=field_errors
+        )
 
 
 class ConflictError(AppError):
-    def __init__(self, identifier: str):
-        super().__init__(message=f"'{identifier}' is existed", status_code=409)
+    def __init__(self, conflicts: Dict[str, Any]):
+        detail_errors = {
+            field: f"Giá trị '{value}' đã tồn tại trong hệ thống"
+            for field, value in conflicts.items()
+        }
+        super().__init__(
+            message="Xung đột dữ liệu",
+            status_code=409,
+            errors=detail_errors
+        )
+
+
+class NotFoundError(AppError):
+    def __init__(self, resource_details: Dict[str, Any]):
+        detail_errors = {
+            field: f"Không tìm thấy bản ghi với {field} = {value}"
+            for field, value in resource_details.items()
+        }
+        super().__init__(
+            message="Không tìm thấy tài nguyên",
+            status_code=404,
+            errors=detail_errors
+        )

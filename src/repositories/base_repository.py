@@ -16,8 +16,8 @@ class BaseRepository(Generic[T]):
 
     def get_by_id(self, uid: UUID) -> T:
         data = self._session.get(self._model, uid)
-        if data is None:
-            raise NotFoundError()
+        if not data:
+            raise NotFoundError(resource_details={"id": str(uid)})
         return data
 
     def create(self, data: T) -> T:
