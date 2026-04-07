@@ -3,7 +3,7 @@ from typing import Optional
 from pydantic import BaseModel, Field, EmailStr
 
 
-class UserBaseSchema(BaseModel):
+class AuthBaseSchema(BaseModel):
     username: str = Field(..., min_length=1, max_length=100)
     email: EmailStr = Field(..., min_length=1, max_length=100)
     first_name: str = Field(..., min_length=1, max_length=100)
@@ -12,19 +12,14 @@ class UserBaseSchema(BaseModel):
     is_verified: Optional[bool] = Field(default=False)
 
 
-class UserCreateSchema(UserBaseSchema):
+class RegisterSchema(AuthBaseSchema):
     pass
 
 
-class UserUpdateSchema(UserBaseSchema):
-    pass
-
-
-class UserLoginSchema(BaseModel):
+class LoginSchema(BaseModel):
     username: str = Field(..., min_length=1, max_length=100)
     password: str = Field(..., min_length=1, max_length=100)
 
 
-class UserLoginResponseSchema(BaseModel):
+class LoginResponseSchema(BaseModel):
     access_token: str
-    refresh_token: str

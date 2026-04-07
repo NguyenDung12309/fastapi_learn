@@ -3,18 +3,26 @@ from sqlmodel import Session
 
 from src.db.main import db_manager
 from src.models import UserModel
+from src.repositories.auth_repository import AuthRepository
 from src.repositories.user_repository import UserRepository
-from src.schemas.user_schema import UserCreateSchema
-from src.services.user_service import UserService
+from src.schemas.auth_schema import RegisterSchema, LoginSchema
+from src.schemas.user_schema import UserLoginResponseSchema
+from src.services.auth_service import AuthService
 
 auth_router = APIRouter()
 
 
-def get_user_service(session: Session = Depends(db_manager.get_db)) -> UserService:
-    repository = UserRepository(session)
-    return UserService(repository)
+def get_auth_service(session: Session = Depends(db_manager.get_db)) -> AuthService:
+    repository = AuthRepository(session)
+    user_repository = UserRepository(session)
+    return AuthService(repository, user_repository)
 
 
 @auth_router.post("/register", response_model=UserModel)
-def create_user(payload: UserCreateSchema, service: UserService = Depends(get_user_service)):
-    return service.create(payload)
+def register(payload: RegisterSchema, service: AuthService = Depends(get_auth_service)):
+    return service.register(payload)
+
+
+@auth_router.post("/login", response_model=UserLoginResponseSchema)
+def login(payload: LoginSchema, service: AuthService = Depends(get_auth_service)):
+    return service.login(payload)

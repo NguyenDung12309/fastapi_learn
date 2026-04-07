@@ -57,3 +57,11 @@ class NotFoundError(AppError):
             status_code=404,
             errors=detail_errors
         )
+
+
+class UnauthorizedError(AppError):
+    def __init__(self, message: str = "Không có quyền truy cập"):
+        super().__init__(
+            message=message,
+            status_code=401
+        )
