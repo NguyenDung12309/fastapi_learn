@@ -5,8 +5,7 @@ from src.models import UserModel
 from src.models.token_model import TokenModel
 from src.repositories.auth_repository import AuthRepository
 from src.repositories.user_repository import UserRepository
-from src.schemas.auth_schema import RegisterSchema
-from src.schemas.user_schema import UserLoginSchema, UserLoginResponseSchema
+from src.schemas.auth_schema import RegisterSchema, LoginSchema, LoginResponseSchema
 
 
 class AuthService:
@@ -28,7 +27,7 @@ class AuthService:
             raise ConflictError(conflicts=conflicts)
         return self._repository.register(data)
 
-    def login(self, schema: UserLoginSchema):
+    def login(self, schema: LoginSchema):
         error_msg = "Tài khoản hoặc mật khẩu không chính xác"
         user_exist = self._user_repository.get_user_by_username(schema.username)
         if not user_exist:
@@ -45,4 +44,4 @@ class AuthService:
             is_revoked=False
         )
         self._repository.save_refresh_token(new_token_data)
-        return UserLoginResponseSchema(access_token=access_token, refresh_token=refresh_token)
+        return LoginResponseSchema(access_token=access_token, refresh_token=refresh_token)
