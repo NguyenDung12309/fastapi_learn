@@ -11,3 +11,6 @@ class PasswordHasher:
     @staticmethod
     def verify(password: str, hashed_password: str) -> bool:
         return pwd_context.verify(password, hashed_password)
+
+
+password_hasher = PasswordHasher()

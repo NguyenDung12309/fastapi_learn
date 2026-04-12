@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Optional
 
 from pydantic import BaseModel, Field, EmailStr
@@ -24,3 +25,29 @@ class LoginSchema(BaseModel):
 class LoginResponseSchema(BaseModel):
     access_token: str
     refresh_token: str
+
+
+class TokenType(str, Enum):
+    ACCESS = "access_token"
+    REFRESH = "refresh_token"
+
+
+class TokenDataSchema(BaseModel):
+    id: str
+    type: TokenType
+
+
+class AccessTokenDataSchema(TokenDataSchema):
+    username: str
+
+
+class RefreshTokenDataSchema(TokenDataSchema):
+    username: str
+
+
+class AccessTokenRequestSchema(BaseModel):
+    refresh_token: str
+
+
+class AccessTokenResponseSchema(BaseModel):
+    access_token: str

@@ -35,3 +35,8 @@ class BaseRepository(Generic[T]):
         self._session.commit()
         self._session.refresh(data)
         return data
+
+    def delete(self, uid: UUID) -> None:
+        data = self.get_by_id(uid)
+        self._session.delete(data)
+        self._session.commit()

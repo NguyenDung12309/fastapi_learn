@@ -33,3 +33,6 @@ class BaseService(Generic[T, TCreate, TUpdate]):
             setattr(info, key, value)
 
         return self._repository.update(info)
+
+    def delete_by_id(self, uid: UUID):
+        self._repository.delete(uid)

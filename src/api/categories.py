@@ -4,13 +4,16 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlmodel import Session
 
+from src.core.dependency import access_token_bear_depend
 from src.db.main import db_manager
 from src.models.categories_model import CategoryModel
 from src.repositories.categories_repository import CategoryRepository
 from src.schemas.category_schema import CategoryCreateSchema, CategoryUpdateSchema
 from src.services.categories_service import CategoryService
 
-category_router = APIRouter()
+category_router = APIRouter(
+    dependencies=[Depends(access_token_bear_depend)]
+)
 
 
 def get_category_service(session: Session = Depends(db_manager.get_db)) -> CategoryService:

@@ -1,10 +1,15 @@
 from datetime import timedelta, datetime, timezone
+from typing import TypeVar, Type
 from uuid import UUID
 
 import jwt
+from pydantic import ValidationError
 
 from src.core.config import Config
-from src.core.exceptions import UnauthorizedError
+from src.core.exceptions import UnauthorizedError, ForbiddenError
+from src.schemas.auth_schema import TokenDataSchema, AccessTokenDataSchema, TokenType, RefreshTokenDataSchema
+
+T = TypeVar("T", bound=TokenDataSchema)
 
 
 class TokenConfig:
@@ -17,33 +22,53 @@ class TokenConfig:
 
     @classmethod
     def create_access_token(cls, user_id: UUID, username: str) -> str:
-        payload = {
-            "id": str(user_id),
-            "username": username,
-        }
+        payload = AccessTokenDataSchema(
+            id=str(user_id),
+            username=username,
+            type=TokenType.ACCESS
+        )
         return cls._generate_token(
-            payload,
+            payload.model_dump(),
             timedelta(minutes=Config.ACCESS_TOKEN_EXPIRE_M)
         )
 
     @classmethod
-    def create_refresh_token(cls, user_id: UUID) -> tuple[str, datetime]:
-        payload = {
-            "id": str(user_id),
-        }
+    def create_refresh_token(cls, user_id: UUID, username: str) -> tuple[str, datetime]:
+        payload = RefreshTokenDataSchema(
+            id=str(user_id),
+            username=username,
+            type=TokenType.REFRESH
+        )
         expires_delta = datetime.now(timezone.utc) + timedelta(days=Config.REFRESH_TOKEN_EXPIRE_D)
         token = cls._generate_token(
-            payload,
+            payload.model_dump(),
             timedelta(days=Config.REFRESH_TOKEN_EXPIRE_D)
         )
         return token, expires_delta
 
     @staticmethod
-    def decode_token(token: str) -> dict:
+    def _decode_base(token: str, schema_type: Type[T]) -> T:
         try:
             payload = jwt.decode(token, Config.SECRET_KEY, algorithms=[Config.ALGORITHM])
-            return payload
+            return schema_type.model_validate(payload)
         except jwt.ExpiredSignatureError:
             raise UnauthorizedError("Token đã hết hạn")
-        except jwt.InvalidTokenError:
+        except (jwt.InvalidTokenError, ValidationError):
             raise UnauthorizedError("Token không hợp lệ")
+
+    @classmethod
+    def decode_token_access(cls, token: str) -> AccessTokenDataSchema:
+        token_data = cls._decode_base(token, AccessTokenDataSchema)
+        if not token_data or token_data.type != TokenType.ACCESS:
+            raise ForbiddenError("Token không phải là Access Token")
+        return token_data
+
+    @classmethod
+    def decode_token_refresh(cls, token: str) -> RefreshTokenDataSchema:
+        token_data = cls._decode_base(token, RefreshTokenDataSchema)
+        if not token_data or token_data.type != TokenType.REFRESH:
+            raise ForbiddenError("Token không phải là Refresh Token")
+        return token_data
+
+
+token_config = TokenConfig()

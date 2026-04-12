@@ -1,4 +1,4 @@
-from src.core.security import PasswordHasher
+from src.core.security import password_hasher
 from src.models import UserModel
 from src.repositories.user_repository import UserRepository
 from src.schemas.user_schema import UserCreateSchema
@@ -13,6 +13,6 @@ class UserService(BaseService[UserModel, UserCreateSchema, UserModel]):
     def create(self, schema: UserCreateSchema):
         user_data = schema.model_dump()
         if "password" in user_data:
-            user_data["password"] = PasswordHasher.hash(user_data["password"])
+            user_data["password"] = password_hasher.hash(user_data["password"])
         data = self._model_class(**user_data)
         return self._repository.create(data)

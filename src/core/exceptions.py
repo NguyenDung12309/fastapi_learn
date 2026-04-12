@@ -65,3 +65,11 @@ class UnauthorizedError(AppError):
             message=message,
             status_code=401
         )
+
+
+class ForbiddenError(AppError):
+    def __init__(self, message: str = "Bạn không có quyền thực hiện hành động này"):
+        super().__init__(
+            message=message,
+            status_code=403
+        )

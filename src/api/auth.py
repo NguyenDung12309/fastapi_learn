@@ -5,7 +5,7 @@ from src.db.main import db_manager
 from src.models import UserModel
 from src.repositories.auth_repository import AuthRepository
 from src.repositories.user_repository import UserRepository
-from src.schemas.auth_schema import RegisterSchema, LoginSchema, LoginResponseSchema
+from src.schemas.auth_schema import RegisterSchema, LoginSchema, LoginResponseSchema, AccessTokenRequestSchema
 from src.services.auth_service import AuthService
 
 auth_router = APIRouter()
@@ -25,3 +25,8 @@ def register(payload: RegisterSchema, service: AuthService = Depends(get_auth_se
 @auth_router.post("/login", response_model=LoginResponseSchema)
 def login(payload: LoginSchema, service: AuthService = Depends(get_auth_service)):
     return service.login(payload)
+
+
+@auth_router.post("/refresh")
+def refresh_token(payload: AccessTokenRequestSchema, service: AuthService = Depends(get_auth_service)):
+    return service.get_access_token(payload)

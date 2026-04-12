@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID, uuid4
 
-from sqlalchemy import func, text
+from sqlalchemy import func, text, DateTime
 from sqlmodel import Field, SQLModel
 
 
@@ -15,14 +15,16 @@ class BaseTableModel(SQLModel):
             "server_default": text("gen_random_uuid()"),
         }
     )
-    created_at: Optional[datetime] = Field(
+    created_at: datetime = Field(
         default=None,
+        sa_type=DateTime(timezone=True),
         sa_column_kwargs={
             "server_default": func.now(),
         }
     )
-    updated_at: Optional[datetime] = Field(
+    updated_at: datetime = Field(
         default=None,
+        sa_type=DateTime(timezone=True),
         sa_column_kwargs={
             "server_default": func.now(),
             "onupdate": func.now(),
