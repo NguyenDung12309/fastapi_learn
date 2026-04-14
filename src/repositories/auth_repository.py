@@ -5,7 +5,6 @@ from sqlmodel import select
 
 from src.models import UserModel
 from src.models.token_model import TokenModel
-from src.schemas.auth_schema import AccessTokenRequestSchema
 
 
 class AuthRepository:
@@ -23,14 +22,15 @@ class AuthRepository:
         self._session.commit()
         self._session.refresh(payload)
 
-    def get_refresh_token(self, payload: AccessTokenRequestSchema) -> Optional[TokenModel]:
+    def get_refresh_token(self, refresh_token: str) -> Optional[TokenModel]:
         statement = select(TokenModel).where(
-            TokenModel.refresh_token == payload.refresh_token,
-            TokenModel.is_revoked == False
+            TokenModel.refresh_token == refresh_token,
         )
         return self._session.exec(statement).first()
 
-    def delete_refresh_token(self, payload: AccessTokenRequestSchema):
-        data = self.get_refresh_token(payload)
-        self._session.delete(data)
+    def revoke_refresh_token(self, refresh_token: str):
+        data = self.get_refresh_token(refresh_token)
+        if data:
+            data.is_revoked = True
+        self._session.add(data)
         self._session.commit()

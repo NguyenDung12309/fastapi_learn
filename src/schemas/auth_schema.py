@@ -35,9 +35,11 @@ class TokenType(str, Enum):
 class TokenDataSchema(BaseModel):
     id: str
     type: TokenType
+    exp: Optional[int] = None
 
 
 class AccessTokenDataSchema(TokenDataSchema):
+    jti: str
     username: str
 
 
@@ -51,3 +53,7 @@ class AccessTokenRequestSchema(BaseModel):
 
 class AccessTokenResponseSchema(BaseModel):
     access_token: str
+
+
+class LogoutRequestSchema(BaseModel):
+    refresh_token: str

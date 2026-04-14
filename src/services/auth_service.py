@@ -50,15 +50,22 @@ class AuthService:
         self._repository.save_refresh_token(new_token_data)
         return LoginResponseSchema(access_token=access_token, refresh_token=refresh_token)
 
-    def get_access_token(self, schema: AccessTokenRequestSchema):
-        refresh_token_data = self._repository.get_refresh_token(schema)
-        if not refresh_token_data or refresh_token_data.is_revoked or refresh_token_data.expires_at < datetime.now(
+    def revoke_refresh_token(self, refresh_token: str):
+        self._repository.revoke_refresh_token(refresh_token)
+
+    def verify_refresh_token(self, refresh_token: str):
+        refresh_token_record = self._repository.get_refresh_token(refresh_token)
+        if not refresh_token_record or refresh_token_record.is_revoked or refresh_token_record.expires_at < datetime.now(
                 timezone.utc):
             raise UnauthorizedError("Refresh Token không hợp lệ hoặc đã hết hạn")
-        decode_token = token_config.decode_token_refresh(refresh_token_data.refresh_token)
+        return refresh_token_record
+
+    def get_access_token(self, schema: AccessTokenRequestSchema):
+        refresh_token_record = self.verify_refresh_token(schema.refresh_token)
+        decode_token = token_config.decode_token_refresh(refresh_token_record.refresh_token)
         user_info = self._user_repository.get_by_id(decode_token.id)
         new_access_token = token_config.create_access_token(user_id=user_info.id, username=user_info.username)
-        self._repository.delete_refresh_token(schema)
+        self.revoke_refresh_token(schema.refresh_token)
         return AccessTokenResponseSchema(
             access_token=new_access_token,
         )

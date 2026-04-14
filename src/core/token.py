@@ -1,12 +1,13 @@
 from datetime import timedelta, datetime, timezone
 from typing import TypeVar, Type
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import jwt
 from pydantic import ValidationError
 
 from src.core.config import Config
 from src.core.exceptions import UnauthorizedError, ForbiddenError
+from src.core.redis_store import redis_store
 from src.schemas.auth_schema import TokenDataSchema, AccessTokenDataSchema, TokenType, RefreshTokenDataSchema
 
 T = TypeVar("T", bound=TokenDataSchema)
@@ -25,7 +26,8 @@ class TokenConfig:
         payload = AccessTokenDataSchema(
             id=str(user_id),
             username=username,
-            type=TokenType.ACCESS
+            type=TokenType.ACCESS,
+            jti=str(uuid4())
         )
         return cls._generate_token(
             payload.model_dump(),
@@ -37,7 +39,7 @@ class TokenConfig:
         payload = RefreshTokenDataSchema(
             id=str(user_id),
             username=username,
-            type=TokenType.REFRESH
+            type=TokenType.REFRESH,
         )
         expires_delta = datetime.now(timezone.utc) + timedelta(days=Config.REFRESH_TOKEN_EXPIRE_D)
         token = cls._generate_token(
@@ -61,6 +63,10 @@ class TokenConfig:
         token_data = cls._decode_base(token, AccessTokenDataSchema)
         if not token_data or token_data.type != TokenType.ACCESS:
             raise ForbiddenError("Token không phải là Access Token")
+        jti = token_data.jti
+        is_exist = redis_store.token_in_blocklist(jti=jti)
+        if is_exist:
+            raise UnauthorizedError("Token đã bị vô hiệu hóa")
         return token_data
 
     @classmethod

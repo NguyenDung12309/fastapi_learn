@@ -7,7 +7,9 @@ class Settings(BaseSettings):
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_M: int
     REFRESH_TOKEN_EXPIRE_D: int
-    
+    REDIS_HOST: str
+    REDIS_PORT: int
+
     @property
     def database_url(self):
         return self.DATABASE_URL
