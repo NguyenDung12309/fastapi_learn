@@ -89,5 +89,11 @@ pip freeze > requirements.txt
 ```
 
 ---
-test commit
+
+## 7. Alembic
+
+```bash
+docker compose exec be alembic revision --autogenerate -m "Init database"
+docker compose exec be alembic upgrade head  
+```
 
