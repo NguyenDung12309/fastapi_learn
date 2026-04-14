@@ -11,6 +11,7 @@ class UserModel(BaseTableModel, table=True):
     email: str = Field(unique=True)
     first_name: str
     last_name: str
+    role: str
     password: str = Field(exclude=True)
     is_verified: bool
     published_books: List["BookModel"] = Relationship(back_populates="publisher")
