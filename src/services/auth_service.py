@@ -51,6 +51,7 @@ class AuthService:
         return LoginResponseSchema(access_token=access_token, refresh_token=refresh_token)
 
     def revoke_refresh_token(self, refresh_token: str):
+        self.verify_refresh_token(refresh_token)
         self._repository.revoke_refresh_token(refresh_token)
 
     def verify_refresh_token(self, refresh_token: str):
