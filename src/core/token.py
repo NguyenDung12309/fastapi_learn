@@ -5,10 +5,11 @@ from uuid import UUID, uuid4
 import jwt
 from pydantic import ValidationError
 
+from src.common.enum_common import TokenType
 from src.core.config import Config
 from src.core.exceptions import UnauthorizedError, ForbiddenError
 from src.core.redis_store import redis_store
-from src.schemas.auth_schema import TokenDataSchema, AccessTokenDataSchema, TokenType, RefreshTokenDataSchema
+from src.schemas.auth_schema import TokenDataSchema, AccessTokenDataSchema, RefreshTokenDataSchema
 
 T = TypeVar("T", bound=TokenDataSchema)
 

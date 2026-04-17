@@ -1,7 +1,8 @@
-from enum import Enum
 from typing import Optional
 
 from pydantic import BaseModel, Field, EmailStr
+
+from src.common.enum_common import TokenType
 
 
 class AuthBaseSchema(BaseModel):
@@ -25,11 +26,6 @@ class LoginSchema(BaseModel):
 class LoginResponseSchema(BaseModel):
     access_token: str
     refresh_token: str
-
-
-class TokenType(str, Enum):
-    ACCESS = "access_token"
-    REFRESH = "refresh_token"
 
 
 class TokenDataSchema(BaseModel):
