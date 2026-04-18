@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, BackgroundTasks
 from sqlmodel import Session
 
 from src.core.dependency import access_token_bear_depend
@@ -21,8 +21,9 @@ def get_auth_service(session: Session = Depends(db_manager.get_db)) -> AuthServi
 
 
 @auth_router.post("/register", response_model=UserModel)
-def register(payload: RegisterSchema, service: AuthService = Depends(get_auth_service)):
-    return service.register(payload)
+def register(payload: RegisterSchema, background_tasks: BackgroundTasks,
+             service: AuthService = Depends(get_auth_service)):
+    return service.register(payload, background_tasks=background_tasks)
 
 
 @auth_router.post("/login", response_model=LoginResponseSchema)

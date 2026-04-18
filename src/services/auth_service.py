@@ -1,5 +1,7 @@
 from datetime import datetime, timezone
 
+from fastapi import BackgroundTasks
+
 from src.core.exceptions import ConflictError, UnauthorizedError
 from src.core.security import password_hasher
 from src.core.token import token_config
@@ -9,6 +11,7 @@ from src.repositories.auth_repository import AuthRepository
 from src.repositories.user_repository import UserRepository
 from src.schemas.auth_schema import RegisterSchema, LoginSchema, LoginResponseSchema, AccessTokenRequestSchema, \
     AccessTokenResponseSchema
+from src.services.email_service import EmailService
 
 
 class AuthService:
@@ -16,7 +19,7 @@ class AuthService:
         self._repository = repository
         self._user_repository = user_repository
 
-    def register(self, schema: RegisterSchema):
+    def register(self, schema: RegisterSchema, background_tasks: BackgroundTasks):
         user_data = schema.model_dump()
         if "password" in user_data:
             user_data["password"] = password_hasher.hash(user_data["password"])
@@ -28,7 +31,13 @@ class AuthService:
             conflicts["username"] = data.username
         if conflicts:
             raise ConflictError(conflicts=conflicts)
-        return self._repository.register(data)
+        new_user = self._repository.register(data)
+        background_tasks.add_task(
+            EmailService.send_registration_email,
+            to_email=new_user.email,
+            username=new_user.username
+        )
+        return new_user
 
     def login(self, schema: LoginSchema):
         error_msg = "Tài khoản hoặc mật khẩu không chính xác"

@@ -9,6 +9,13 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_D: int
     REDIS_HOST: str
     REDIS_PORT: int
+    MAIL_SERVER: str
+    MAIL_PORT: int
+    MAIL_USERNAME: str
+    MAIL_PASSWORD: str
+    MAIL_FROM: str
+    MAIL_STARTTLS: bool
+    MAIL_SSL_TLS: bool
 
     @property
     def database_url(self):
