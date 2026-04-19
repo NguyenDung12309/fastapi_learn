@@ -10,7 +10,7 @@ from src.models.token_model import TokenModel
 from src.repositories.auth_repository import AuthRepository
 from src.repositories.user_repository import UserRepository
 from src.schemas.auth_schema import RegisterSchema, LoginSchema, LoginResponseSchema, AccessTokenRequestSchema, \
-    AccessTokenResponseSchema
+    AccessTokenResponseSchema, CreateAccessTokenSchema
 from src.services.email_service import EmailService
 
 
@@ -47,7 +47,12 @@ class AuthService:
         is_valid_pass = password_hasher.verify(schema.password, user_exist.password)
         if not is_valid_pass:
             raise UnauthorizedError(error_msg)
-        access_token = token_config.create_access_token(user_id=user_exist.id, username=user_exist.username)
+        user_data = CreateAccessTokenSchema(
+            username=user_exist.username,
+            id=user_exist.id,
+            role=user_exist.role
+        )
+        access_token = token_config.create_access_token(user_data)
         refresh_token, expire_time = token_config.create_refresh_token(user_id=user_exist.id,
                                                                        username=user_exist.username)
         new_token_data = TokenModel(
@@ -74,7 +79,7 @@ class AuthService:
         refresh_token_record = self.verify_refresh_token(schema.refresh_token)
         decode_token = token_config.decode_token_refresh(refresh_token_record.refresh_token)
         user_info = self._user_repository.get_by_id(decode_token.id)
-        new_access_token = token_config.create_access_token(user_id=user_info.id, username=user_info.username)
+        new_access_token = token_config.create_access_token(user_info)
         self.revoke_refresh_token(schema.refresh_token)
         return AccessTokenResponseSchema(
             access_token=new_access_token,

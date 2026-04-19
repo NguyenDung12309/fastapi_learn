@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     MAIL_FROM: str
     MAIL_STARTTLS: bool
     MAIL_SSL_TLS: bool
+    API_PREFIX: str = "/api/v1"
 
     @property
     def database_url(self):

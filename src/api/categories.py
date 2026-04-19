@@ -4,7 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlmodel import Session
 
-from src.core.dependency import access_token_bear_depend
+from src.core.dependency import access_token_bear_depend, allow_admin
 from src.db.main import db_manager
 from src.models.categories_model import CategoryModel
 from src.repositories.categories_repository import CategoryRepository
@@ -26,7 +26,7 @@ def create_category(payload: CategoryCreateSchema, service: CategoryService = De
     return service.create(payload)
 
 
-@category_router.get("/", response_model=Sequence[CategoryModel])
+@category_router.get("/", response_model=Sequence[CategoryModel], dependencies=[Depends(allow_admin)])
 def list_category(service: CategoryService = Depends(get_category_service)):
     return service.get_all()
 

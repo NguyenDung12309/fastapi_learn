@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from sqlmodel import SQLModel
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
@@ -8,12 +8,9 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 from src.api import api_router
+from src.core.config import Config
 from src.core.exceptions import AppError
 from src.db.main import db_manager
-
-
-def verify_token():
-    print("Check token")
 
 
 class FastAPIServer:
@@ -26,7 +23,6 @@ class FastAPIServer:
             version="0.0.1",
             openapi_url="/api/v1/openapi.json",
             servers=[{"url": "http://localhost:8000", "description": "Local"}],
-            dependencies=[Depends(verify_token)],
             docs_url="/docs",
             redoc_url="/redoc",
             middleware=[
@@ -43,7 +39,7 @@ class FastAPIServer:
         self._setup_exception_handlers()
 
     def _setup_routers(self):
-        self._app.include_router(api_router, prefix="/api/v1")
+        self._app.include_router(api_router, prefix=Config.API_PREFIX)
 
     def _setup_exception_handlers(self):
 

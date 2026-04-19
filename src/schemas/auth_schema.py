@@ -1,8 +1,9 @@
 from typing import Optional
+from uuid import UUID
 
 from pydantic import BaseModel, Field, EmailStr
 
-from src.common.enum_common import TokenType
+from src.common.enum_common import TokenType, UserRole
 
 
 class AuthBaseSchema(BaseModel):
@@ -37,6 +38,7 @@ class TokenDataSchema(BaseModel):
 class AccessTokenDataSchema(TokenDataSchema):
     jti: str
     username: str
+    role: UserRole
 
 
 class RefreshTokenDataSchema(TokenDataSchema):
@@ -53,3 +55,9 @@ class AccessTokenResponseSchema(BaseModel):
 
 class LogoutRequestSchema(BaseModel):
     refresh_token: str
+
+
+class CreateAccessTokenSchema(BaseModel):
+    username: str
+    id: UUID
+    role: UserRole

@@ -9,7 +9,8 @@ from src.common.enum_common import TokenType
 from src.core.config import Config
 from src.core.exceptions import UnauthorizedError, ForbiddenError
 from src.core.redis_store import redis_store
-from src.schemas.auth_schema import TokenDataSchema, AccessTokenDataSchema, RefreshTokenDataSchema
+from src.schemas.auth_schema import TokenDataSchema, AccessTokenDataSchema, RefreshTokenDataSchema, \
+    CreateAccessTokenSchema
 
 T = TypeVar("T", bound=TokenDataSchema)
 
@@ -23,10 +24,11 @@ class TokenConfig:
         return jwt.encode(to_encode, Config.SECRET_KEY, algorithm=Config.ALGORITHM)
 
     @classmethod
-    def create_access_token(cls, user_id: UUID, username: str) -> str:
+    def create_access_token(cls, user_data: CreateAccessTokenSchema) -> str:
+        exclude_data = user_data.model_dump(exclude={'id'})
         payload = AccessTokenDataSchema(
-            id=str(user_id),
-            username=username,
+            **exclude_data,
+            id=str(user_data.id),
             type=TokenType.ACCESS,
             jti=str(uuid4())
         )
