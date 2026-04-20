@@ -61,3 +61,8 @@ class CreateAccessTokenSchema(BaseModel):
     username: str
     id: UUID
     role: UserRole
+
+
+class ChangePasswordRequestSchema(BaseModel):
+    old_password: str
+    new_password: str

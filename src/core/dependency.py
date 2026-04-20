@@ -1,10 +1,9 @@
-from typing import List
-
 from fastapi import Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from starlette.requests import Request
 
-from src.common.enum_common import UserRole
+from src.common.enum_common import PermissionKey
+from src.common.matrix_permission import ROLE_PERMISSIONS
 from src.core.exceptions import ForbiddenError
 from src.core.token import token_config
 from src.schemas.auth_schema import AccessTokenDataSchema
@@ -30,19 +29,16 @@ class AccessTokenBearerAuthentication(TokenBearerAuthentication):
 access_token_bear_depend = AccessTokenBearerAuthentication()
 
 
-class RoleChecker:
-
-    def __init__(self, allowed_roles: List[UserRole]):
-        self.allowed_roles = allowed_roles
+class PermissionChecker:
+    def __init__(self, required_permission: PermissionKey):
+        self.required_permission = required_permission
 
     def __call__(self, token_data: AccessTokenDataSchema = Depends(access_token_bear_depend)):
-        user_role = getattr(token_data, "role", UserRole.USER)
+        user_role = token_data.role
 
-        if user_role not in self.allowed_roles:
-            raise ForbiddenError(f"Quyền {user_role} không thể thực hiện hành động này.")
+        user_permissions = ROLE_PERMISSIONS.get(user_role, [])
+
+        if self.required_permission not in user_permissions:
+            raise ForbiddenError(f"Yêu cầu quyền: {self.required_permission}")
 
         return token_data
-
-
-allow_admin = RoleChecker([UserRole.ADMIN])
-allow_moderator_admin = RoleChecker([UserRole.ADMIN, UserRole.USER])
