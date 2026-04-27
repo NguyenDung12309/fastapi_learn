@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from fastapi import BackgroundTasks
 
 from src.core.exceptions import ConflictError, UnauthorizedError
+from src.core.exceptions import NotFoundError
 from src.core.security import password_hasher
 from src.core.token import token_config
 from src.models import UserModel
@@ -11,13 +12,15 @@ from src.repositories.auth_repository import AuthRepository
 from src.repositories.user_repository import UserRepository
 from src.schemas.auth_schema import RegisterSchema, LoginSchema, LoginResponseSchema, AccessTokenRequestSchema, \
     AccessTokenResponseSchema, CreateAccessTokenSchema
+from src.schemas.user_schema import ForgotPasswordRequestSchema, ResetPasswordRequestSchema
 from src.services.email_service import EmailService
 
 
 class AuthService:
-    def __init__(self, repository: AuthRepository, user_repository: UserRepository):
+    def __init__(self, repository: AuthRepository, user_repository: UserRepository, email_service: EmailService):
         self._repository = repository
         self._user_repository = user_repository
+        self._email_service = email_service
 
     def register(self, schema: RegisterSchema, background_tasks: BackgroundTasks):
         user_data = schema.model_dump()
@@ -84,3 +87,26 @@ class AuthService:
         return AccessTokenResponseSchema(
             access_token=new_access_token,
         )
+
+    def forgot_password(self, schema: ForgotPasswordRequestSchema, background_tasks: BackgroundTasks):
+        user = self._user_repository.get_user_by_email(schema.email)
+        message = "Vui lòng kiểm tra email của bạn."
+        if not user:
+            return {"message": message}
+        token = token_config.create_password_reset_token(email=user.email)
+        background_tasks.add_task(
+            self._email_service.send_reset_password_email,
+            to_email=user.email,
+            token=token
+        )
+        return {"message": f"{message}"}
+
+    def reset_password(self, schema: ResetPasswordRequestSchema):
+        email = token_config.decode_password_reset_token(schema.token)
+        user = self._user_repository.get_user_by_email(email)
+        if not user:
+            raise NotFoundError(resource_details={"email": email})
+
+        user.password = password_hasher.hash(schema.new_password)
+        self._user_repository.update(user)
+        return {"message": "Mật khẩu đã được cập nhật thành công."}

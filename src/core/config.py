@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_M: int
     REFRESH_TOKEN_EXPIRE_D: int
+    RESET_PASSWORD_EXPIRE_M: int
     REDIS_HOST: str
     REDIS_PORT: int
     MAIL_SERVER: str
@@ -17,6 +18,7 @@ class Settings(BaseSettings):
     MAIL_STARTTLS: bool
     MAIL_SSL_TLS: bool
     API_PREFIX: str = "/api/v1"
+    FE_URL: str
 
     @property
     def database_url(self):

@@ -36,3 +36,12 @@ class UserLoginResponseSchema(BaseModel):
 class GetMeResponseSchema(UserBaseSchema):
     id: UUID
     permissions: List[PermissionKey] = Field(default_factory=list)
+
+
+class ForgotPasswordRequestSchema(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequestSchema(BaseModel):
+    token: str
+    new_password: str = Field(..., min_length=5, max_length=50)

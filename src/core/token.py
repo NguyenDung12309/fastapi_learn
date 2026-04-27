@@ -51,6 +51,15 @@ class TokenConfig:
         )
         return token, expires_delta
 
+    @classmethod
+    def create_password_reset_token(cls, email: str) -> str:
+        payload = {
+            "email": email,
+            "type": TokenType.RESET_PASSWORD,
+            "jti": str(uuid4())
+        }
+        return cls._generate_token(payload, timedelta(minutes=Config.RESET_PASSWORD_EXPIRE_M))
+
     @staticmethod
     def _decode_base(token: str, schema_type: Type[T]) -> T:
         try:
@@ -78,6 +87,18 @@ class TokenConfig:
         if not token_data or token_data.type != TokenType.REFRESH:
             raise ForbiddenError("Token không phải là Refresh Token")
         return token_data
+
+    @classmethod
+    def decode_password_reset_token(cls, token: str) -> str:
+        try:
+            payload = jwt.decode(token, Config.SECRET_KEY, algorithms=[Config.ALGORITHM])
+            if payload.get("type") != TokenType.RESET_PASSWORD:
+                raise UnauthorizedError("Token không hợp lệ")
+            return payload.get("email")
+        except jwt.ExpiredSignatureError:
+            raise UnauthorizedError("Liên kết đặt lại mật khẩu đã hết hạn")
+        except jwt.InvalidTokenError:
+            raise UnauthorizedError("Liên kết không hợp lệ")
 
 
 token_config = TokenConfig()

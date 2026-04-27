@@ -9,7 +9,9 @@ from src.repositories.auth_repository import AuthRepository
 from src.repositories.user_repository import UserRepository
 from src.schemas.auth_schema import RegisterSchema, LoginSchema, LoginResponseSchema, AccessTokenRequestSchema, \
     AccessTokenResponseSchema, LogoutRequestSchema, AccessTokenDataSchema
+from src.schemas.user_schema import ForgotPasswordRequestSchema, ResetPasswordRequestSchema
 from src.services.auth_service import AuthService
+from src.services.email_service import EmailService
 
 auth_router = APIRouter()
 
@@ -17,7 +19,8 @@ auth_router = APIRouter()
 def get_auth_service(session: Session = Depends(db_manager.get_db)) -> AuthService:
     repository = AuthRepository(session)
     user_repository = UserRepository(session)
-    return AuthService(repository, user_repository)
+    email_service = EmailService()
+    return AuthService(repository, user_repository, email_service)
 
 
 @auth_router.post("/register", response_model=UserModel)
@@ -41,3 +44,20 @@ def logout(payload: LogoutRequestSchema, credentials: AccessTokenDataSchema = De
            service: AuthService = Depends(get_auth_service)):
     redis_store.add_jti_to_blocklist(jti=credentials.jti, expires_in=credentials.exp)
     service.revoke_refresh_token(payload.refresh_token)
+
+
+@auth_router.post("/forgot-password")
+def forgot_password(
+        payload: ForgotPasswordRequestSchema,
+        background_tasks: BackgroundTasks,
+        service: AuthService = Depends(get_auth_service)
+):
+    return service.forgot_password(payload, background_tasks)
+
+
+@auth_router.post("/reset-password")
+def reset_password(
+        payload: ResetPasswordRequestSchema,
+        service: AuthService = Depends(get_auth_service)
+):
+    return service.reset_password(payload)

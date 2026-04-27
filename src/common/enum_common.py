@@ -10,6 +10,7 @@ class UserRole(str, Enum):
 class TokenType(str, Enum):
     ACCESS = "access_token"
     REFRESH = "refresh_token"
+    RESET_PASSWORD = "reset_password"
 
 
 class PermissionKey(str, Enum):
