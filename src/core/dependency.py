@@ -1,4 +1,3 @@
-from fastapi import Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from starlette.requests import Request
 
@@ -23,6 +22,7 @@ class AccessTokenBearerAuthentication(TokenBearerAuthentication):
     async def __call__(self, request: Request) -> AccessTokenDataSchema:
         creds = await super().__call__(request)
         token_data = token_config.decode_token_access(creds.credentials)
+        request.state.user = token_data
         return token_data
 
 
@@ -33,7 +33,8 @@ class PermissionChecker:
     def __init__(self, required_permission: PermissionKey):
         self.required_permission = required_permission
 
-    def __call__(self, token_data: AccessTokenDataSchema = Depends(access_token_bear_depend)):
+    def __call__(self, request: Request):
+        token_data: AccessTokenDataSchema = getattr(request.state, "user", None)
         user_role = token_data.role
 
         user_permissions = ROLE_PERMISSIONS.get(user_role, [])

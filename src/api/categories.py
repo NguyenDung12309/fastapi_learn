@@ -9,12 +9,10 @@ from src.core.dependency import access_token_bear_depend, PermissionChecker
 from src.db.main import db_manager
 from src.models.categories_model import CategoryModel
 from src.repositories.categories_repository import CategoryRepository
-from src.schemas.category_schema import CategoryCreateSchema, CategoryUpdateSchema
+from src.schemas.category_schema import CategoryCreateSchema
 from src.services.categories_service import CategoryService
 
-category_router = APIRouter(
-    dependencies=[Depends(access_token_bear_depend)]
-)
+category_router = APIRouter()
 
 
 def get_category_service(session: Session = Depends(db_manager.get_db)) -> CategoryService:
@@ -22,13 +20,14 @@ def get_category_service(session: Session = Depends(db_manager.get_db)) -> Categ
     return CategoryService(repository)
 
 
-@category_router.post("/", response_model=CategoryModel)
+@category_router.post("/", response_model=CategoryModel, dependencies=[Depends(access_token_bear_depend),
+                                                                       Depends(PermissionChecker(
+                                                                           PermissionKey.CREATE_CATEGORY))])
 def create_category(payload: CategoryCreateSchema, service: CategoryService = Depends(get_category_service)):
     return service.create(payload)
 
 
-@category_router.get("/", response_model=Sequence[CategoryModel],
-                     dependencies=[Depends(PermissionChecker(PermissionKey.VIEW_CATEGORY_LIST))])
+@category_router.get("/", response_model=Sequence[CategoryModel])
 def list_category(service: CategoryService = Depends(get_category_service)):
     return service.get_all()
 
@@ -37,7 +36,8 @@ def list_category(service: CategoryService = Depends(get_category_service)):
 def category_detail(uid: UUID, service: CategoryService = Depends(get_category_service)):
     return service.get_by_id(uid)
 
-
-@category_router.patch("/{uid}", response_model=CategoryModel)
-def category_update(uid: UUID, payload: CategoryUpdateSchema, service: CategoryService = Depends(get_category_service)):
-    return service.update(uid, payload)
+# @category_router.patch("/{uid}", response_model=CategoryModel, dependencies=[Depends(access_token_bear_depend),
+#                                                                              Depends(PermissionChecker(
+#                                                                                  PermissionKey.UPDATE_CATEGORY))])
+# def category_update(uid: UUID, payload: CategoryUpdateSchema, service: CategoryService = Depends(get_category_service)):
+#     return service.update(uid, payload)

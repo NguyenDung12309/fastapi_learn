@@ -26,13 +26,12 @@ class BaseService(Generic[T, TCreate, TUpdate]):
         data = self._model_class(**schema.model_dump())
         return self._repository.create(data)
 
-    def update(self, uid: UUID, schema: TUpdate) -> T:
-        info = self._repository.get_by_id(uid)
-        update_data = schema.model_dump()
+    def update(self, instance: T, schema: TUpdate) -> T:
+        update_data = schema.model_dump(exclude_unset=True)
         for key, value in update_data.items():
-            setattr(info, key, value)
+            setattr(instance, key, value)
 
-        return self._repository.update(info)
+        return self._repository.update(instance)
 
     def delete_by_id(self, uid: UUID):
         self._repository.delete(uid)

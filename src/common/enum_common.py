@@ -14,4 +14,5 @@ class TokenType(str, Enum):
 
 
 class PermissionKey(str, Enum):
-    VIEW_CATEGORY_LIST = "view__category_list"
+    CREATE_CATEGORY = "create__category"
+    UPDATE_CATEGORY = "update__category"

@@ -20,7 +20,7 @@ def get_user_service(session: Session = Depends(db_manager.get_db)) -> UserServi
     return UserService(repository)
 
 
-@user_router.get("/", response_model=Sequence[UserModel])
+@user_router.get("/", dependencies=[Depends(access_token_bear_depend)], response_model=Sequence[UserModel])
 def get_user_list(service: UserService = Depends(get_user_service)):
     return service.get_all()
 
