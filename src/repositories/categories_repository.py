@@ -4,7 +4,7 @@ from src.models.categories_model import CategoryModel
 from src.repositories.base_repository import BaseRepository
 
 
-class CategoryRepository(BaseRepository[CategoryModel]):
+class CategoryRepository(BaseRepository):
     def __init__(self, session):
         super().__init__(CategoryModel, session)
 

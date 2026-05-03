@@ -6,7 +6,7 @@ from src.models import UserModel
 from src.repositories.base_repository import BaseRepository
 
 
-class UserRepository(BaseRepository[UserModel]):
+class UserRepository(BaseRepository):
     def __init__(self, session):
         super().__init__(UserModel, session)
 

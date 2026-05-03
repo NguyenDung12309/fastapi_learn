@@ -6,16 +6,17 @@ from src.core.security import password_hasher
 from src.models import UserModel
 from src.repositories.user_repository import UserRepository
 from src.schemas.auth_schema import ChangePasswordRequestSchema
-from src.schemas.user_schema import UserCreateSchema, GetMeResponseSchema
+from src.schemas.user_schema import GetMeResponseSchema
 from src.services.base_service import BaseService
 
 
-class UserService(BaseService[UserModel, UserCreateSchema, UserModel]):
+class UserService(BaseService):
     def __init__(self, repository: UserRepository):
         super().__init__(repository, UserModel)
 
     def get_me(self, user_id: UUID) -> GetMeResponseSchema:
         user = self.get_by_id(user_id)
+
         if not user:
             raise NotFoundError(resource_details={"id": str(user_id)})
 

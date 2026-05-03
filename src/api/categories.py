@@ -9,7 +9,7 @@ from src.core.dependency import access_token_bear_depend, PermissionChecker
 from src.db.main import db_manager
 from src.models.categories_model import CategoryModel
 from src.repositories.categories_repository import CategoryRepository
-from src.schemas.category_schema import CategoryCreateSchema
+from src.schemas.category_schema import CategoryCreateSchema, CategoryUpdateSchema
 from src.services.categories_service import CategoryService
 
 category_router = APIRouter()
@@ -36,8 +36,9 @@ def list_category(service: CategoryService = Depends(get_category_service)):
 def category_detail(uid: UUID, service: CategoryService = Depends(get_category_service)):
     return service.get_by_id(uid)
 
-# @category_router.patch("/{uid}", response_model=CategoryModel, dependencies=[Depends(access_token_bear_depend),
-#                                                                              Depends(PermissionChecker(
-#                                                                                  PermissionKey.UPDATE_CATEGORY))])
-# def category_update(uid: UUID, payload: CategoryUpdateSchema, service: CategoryService = Depends(get_category_service)):
-#     return service.update(uid, payload)
+
+@category_router.patch("/{uid}", response_model=CategoryModel, dependencies=[Depends(access_token_bear_depend),
+                                                                             Depends(PermissionChecker(
+                                                                                 PermissionKey.UPDATE_CATEGORY))])
+def category_update(uid: str, payload: CategoryUpdateSchema, service: CategoryService = Depends(get_category_service)):
+    return service.update(uid=uid, schema=payload)
