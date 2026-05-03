@@ -1,9 +1,10 @@
-from typing import Optional, List
+from typing import List
 from uuid import UUID
 
 from pydantic import BaseModel, Field, EmailStr
 
-from src.common.enum_common import PermissionKey
+from src.common.enum_common import PermissionKey, UserRole
+from src.schemas.auth_schema import AuthBaseSchema
 
 
 class UserBaseSchema(BaseModel):
@@ -11,7 +12,6 @@ class UserBaseSchema(BaseModel):
     email: EmailStr = Field(..., min_length=1, max_length=100)
     first_name: str = Field(..., min_length=1, max_length=100)
     last_name: str = Field(..., min_length=1, max_length=100)
-    is_verified: Optional[bool] = Field(default=False)
 
 
 class UserCreateSchema(UserBaseSchema):
@@ -45,3 +45,7 @@ class ForgotPasswordRequestSchema(BaseModel):
 class ResetPasswordRequestSchema(BaseModel):
     token: str
     new_password: str = Field(..., min_length=5, max_length=50)
+
+
+class CreateAccountRequestSchema(AuthBaseSchema):
+    role: UserRole

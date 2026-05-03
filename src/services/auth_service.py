@@ -12,7 +12,7 @@ from src.repositories.auth_repository import AuthRepository
 from src.repositories.user_repository import UserRepository
 from src.schemas.auth_schema import RegisterSchema, LoginSchema, LoginResponseSchema, AccessTokenRequestSchema, \
     AccessTokenResponseSchema, CreateAccessTokenSchema
-from src.schemas.user_schema import ForgotPasswordRequestSchema, ResetPasswordRequestSchema
+from src.schemas.user_schema import ForgotPasswordRequestSchema, ResetPasswordRequestSchema, CreateAccountRequestSchema
 from src.services.email_service import EmailService
 
 
@@ -22,25 +22,39 @@ class AuthService:
         self._user_repository = user_repository
         self._email_service = email_service
 
-    def register(self, schema: RegisterSchema, background_tasks: BackgroundTasks):
-        user_data = schema.model_dump()
+    def _create_user_internal(self, user_data: dict, background_tasks: BackgroundTasks = None):
         if "password" in user_data:
             user_data["password"] = password_hasher.hash(user_data["password"])
+
         data = UserModel(**user_data)
+
         conflicts = {}
         if self._user_repository.get_user_by_email(data.email):
             conflicts["email"] = data.email
         if self._user_repository.get_user_by_username(data.username):
             conflicts["username"] = data.username
+
         if conflicts:
             raise ConflictError(conflicts=conflicts)
+
         new_user = self._repository.register(data)
-        background_tasks.add_task(
-            EmailService.send_registration_email,
-            to_email=new_user.email,
-            username=new_user.username
-        )
+
+        if background_tasks:
+            background_tasks.add_task(
+                EmailService.send_registration_email,
+                to_email=new_user.email,
+                username=new_user.username
+            )
+
         return new_user
+
+    def register(self, schema: RegisterSchema, background_tasks: BackgroundTasks):
+        user_data = schema.model_dump()
+        return self._create_user_internal(user_data, background_tasks)
+
+    def create_account(self, schema: CreateAccountRequestSchema, background_tasks: BackgroundTasks):
+        user_data = schema.model_dump()
+        return self._create_user_internal(user_data, background_tasks)
 
     def login(self, schema: LoginSchema):
         error_msg = "Tài khoản hoặc mật khẩu không chính xác"

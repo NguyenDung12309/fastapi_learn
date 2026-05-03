@@ -14,5 +14,5 @@ class UserModel(BaseTableModel, table=True):
     last_name: str
     role: UserRole = Field(nullable=False, default=UserRole.USER)
     password: str = Field(exclude=True)
-    is_verified: bool
+    is_verified: bool = Field(default=False)
     published_books: List["BookModel"] = Relationship(back_populates="publisher")

@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, BackgroundTasks
 from sqlmodel import Session
 
-from src.core.dependency import access_token_bear_depend
+from src.common.enum_common import PermissionKey
+from src.core.dependency import access_token_bear_depend, PermissionChecker
 from src.core.redis_store import redis_store
 from src.db.main import db_manager
 from src.models import UserModel
@@ -9,7 +10,7 @@ from src.repositories.auth_repository import AuthRepository
 from src.repositories.user_repository import UserRepository
 from src.schemas.auth_schema import RegisterSchema, LoginSchema, LoginResponseSchema, AccessTokenRequestSchema, \
     AccessTokenResponseSchema, LogoutRequestSchema, AccessTokenDataSchema
-from src.schemas.user_schema import ForgotPasswordRequestSchema, ResetPasswordRequestSchema
+from src.schemas.user_schema import ForgotPasswordRequestSchema, ResetPasswordRequestSchema, CreateAccountRequestSchema
 from src.services.auth_service import AuthService
 from src.services.email_service import EmailService
 
@@ -61,3 +62,12 @@ def reset_password(
         service: AuthService = Depends(get_auth_service)
 ):
     return service.reset_password(payload)
+
+
+@auth_router.post("/create-account", dependencies=[Depends(access_token_bear_depend),
+                                                   Depends(PermissionChecker(
+                                                       PermissionKey.CREATE_ACCOUNT))])
+def create_account(payload: CreateAccountRequestSchema,
+                   background_tasks: BackgroundTasks,
+                   service: AuthService = Depends(get_auth_service)):
+    return service.create_account(payload, background_tasks)

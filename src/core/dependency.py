@@ -20,6 +20,7 @@ class TokenBearerAuthentication(HTTPBearer):
 
 class AccessTokenBearerAuthentication(TokenBearerAuthentication):
     async def __call__(self, request: Request) -> AccessTokenDataSchema:
+        print("111111111111111111")
         creds = await super().__call__(request)
         token_data = token_config.decode_token_access(creds.credentials)
         request.state.user = token_data
@@ -42,4 +43,4 @@ class PermissionChecker:
         if self.required_permission not in user_permissions:
             raise ForbiddenError(f"Yêu cầu quyền: {self.required_permission}")
 
-        return token_data
+        return True

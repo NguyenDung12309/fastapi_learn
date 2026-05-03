@@ -16,3 +16,4 @@ class TokenType(str, Enum):
 class PermissionKey(str, Enum):
     CREATE_CATEGORY = "create__category"
     UPDATE_CATEGORY = "update__category"
+    CREATE_ACCOUNT = "create__account"
