@@ -3,16 +3,15 @@ from uuid import UUID
 from src.common.matrix_permission import ROLE_PERMISSIONS
 from src.core.exceptions import NotFoundError, UnauthorizedError
 from src.core.security import password_hasher
-from src.models import UserModel
 from src.repositories.user_repository import UserRepository
 from src.schemas.auth_schema import ChangePasswordRequestSchema
 from src.schemas.user_schema import GetMeResponseSchema
-from src.services.base_service import BaseService
+from src.services.base_service import CRUDMixin
 
 
-class UserService(BaseService):
+class UserService(CRUDMixin[UserRepository]):
     def __init__(self, repository: UserRepository):
-        super().__init__(repository, UserModel)
+        super().__init__(repository)
 
     def get_me(self, user_id: UUID) -> GetMeResponseSchema:
         user = self.get_by_id(user_id)

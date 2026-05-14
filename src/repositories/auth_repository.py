@@ -1,15 +1,14 @@
 from typing import Optional
 
-from sqlmodel import Session
 from sqlmodel import select
 
 from src.models import UserModel
 from src.models.token_model import TokenModel
+from src.repositories.base_repository import BaseRepository
 
 
-class AuthRepository:
-    def __init__(self, session: Session):
-        self._session = session
+class AuthRepository(BaseRepository[UserModel]):
+    model_class = UserModel
 
     def register(self, user: UserModel):
         self._session.add(user)

@@ -4,9 +4,8 @@ from src.models.categories_model import CategoryModel
 from src.repositories.base_repository import BaseRepository
 
 
-class CategoryRepository(BaseRepository):
-    def __init__(self, session):
-        super().__init__(CategoryModel, session)
+class CategoryRepository(BaseRepository[CategoryModel]):
+    model_class = CategoryModel
 
     def get_by_name(self, name: str) -> CategoryModel | None:
         statement = select(CategoryModel).where(CategoryModel.name == name)

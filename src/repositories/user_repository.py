@@ -6,9 +6,8 @@ from src.models import UserModel
 from src.repositories.base_repository import BaseRepository
 
 
-class UserRepository(BaseRepository):
-    def __init__(self, session):
-        super().__init__(UserModel, session)
+class UserRepository(BaseRepository[UserModel]):
+    model_class = UserModel
 
     def get_user_by_email(self, email: str) -> Optional[UserModel]:
         statement = select(UserModel).where(UserModel.email == email)
