@@ -26,6 +26,6 @@ def list_author(service: AuthorService = Depends(get_author_service)):
 
 @author_router.post("/", response_model=AuthorModel, dependencies=[Depends(access_token_bear_depend),
                                                                    Depends(PermissionChecker(
-                                                                       PermissionKey.CREATE_CATEGORY))])
+                                                                       PermissionKey.CREATE_AUTHOR))])
 def create_author(payload: CreateOrGetAuthorSchema, service: AuthorService = Depends(get_author_service)):
     return service.create_or_get_author(payload)
