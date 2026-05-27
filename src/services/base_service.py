@@ -7,7 +7,7 @@ RepositoryT = TypeVar("RepositoryT", bound=BaseRepository)
 RepoT = TypeVar("RepoT", bound=BaseRepository)
 
 
-class CRUDMixin(Generic[RepoT]):
+class ReadMixin(Generic[RepoT]):
     def __init__(self, repository: RepoT):
         self._repository = repository
 

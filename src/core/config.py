@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     MAIL_SSL_TLS: bool
     API_PREFIX: str = "/api/v1"
     FE_URL: str
+    CLOUD_NAME: str
+    CLOUD_KEY: str
+    CLOUD_SECRET: str
 
     @property
     def database_url(self):

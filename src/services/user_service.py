@@ -6,10 +6,10 @@ from src.core.security import password_hasher
 from src.repositories.user_repository import UserRepository
 from src.schemas.auth_schema import ChangePasswordRequestSchema
 from src.schemas.user_schema import GetMeResponseSchema
-from src.services.base_service import CRUDMixin
+from src.services.base_service import ReadMixin
 
 
-class UserService(CRUDMixin[UserRepository]):
+class UserService(ReadMixin[UserRepository]):
     def __init__(self, repository: UserRepository):
         super().__init__(repository)
 

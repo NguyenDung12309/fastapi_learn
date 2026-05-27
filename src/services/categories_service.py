@@ -4,10 +4,10 @@ from src.core.exceptions import ConflictError
 from src.models.categories_model import CategoryModel
 from src.repositories.categories_repository import CategoryRepository
 from src.schemas.category_schema import CategoryCreateSchema, CategoryUpdateSchema
-from src.services.base_service import CRUDMixin
+from src.services.base_service import ReadMixin
 
 
-class CategoryService(CRUDMixin[CategoryRepository]):
+class CategoryService(ReadMixin[CategoryRepository]):
     def __init__(self, repository: CategoryRepository):
         super().__init__(repository)
 
